@@ -11,7 +11,7 @@
    ════════════════════════════════════════════════════════════ */
 :root{
   /* ── EDIT THIS ── */
-  --api-url: "https://script.google.com/macros/s/AKfycby1afG5T6D3LYoGSODyeB5rmgc8Xlr4ZY9h246WXTOlsD0rNFMojgRAKul67GTIOUyxGA/exec";
+  --api-url: "https://script.google.com/macros/s/AKfycbx3koeHfpe-YmubV0jQuLXjZShx3PIC0jU_VL1HGs8cHgB_7bftua9BBYlgPBROGDMVxw/exec";
   
   /* ── Theme ── */
   --navy:#1a1a2e;--navy-light:#242443;--navy-mid:#2d2d52;
@@ -243,54 +243,56 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 // ═══════════════════════════════════════════════════════════
 // CONFIG — Update this after deploying Apps Script
 // ═══════════════════════════════════════════════════════════
-const API_URL = 'https://script.google.com/macros/s/AKfycby1afG5T6D3LYoGSODyeB5rmgc8Xlr4ZY9h246WXTOlsD0rNFMojgRAKul67GTIOUyxGA/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx3koeHfpe-YmubV0jQuLXjZShx3PIC0jU_VL1HGs8cHgB_7bftua9BBYlgPBROGDMVxw/exec';
 const VIN_BASE = 'https://vinsolutions.app.coxautoinc.com/vinconnect/#/CarDashboard/Pages/LeadManagement/ActiveLeadsLayout.aspx?SelectedTab=t_ILM&leftpaneframe=Hide&rightpaneframe=../CRM/CustomerDashboard.aspx?GlobalCustomerID=';
 
 // ═══════════════════════════════════════════════════════════
-// API HELPER — handles Apps Script redirects reliably
+// API HELPER — uses JSONP to bypass CORS/redirect issues
 // ═══════════════════════════════════════════════════════════
-// Apps Script Web Apps return a 302 redirect to script.googleusercontent.com.
-// fetch() with redirect:'follow' should handle this, but some browsers/CORS 
-// configs cause issues. This helper uses two strategies:
-//   1. fetch with redirect:'follow' (works in most cases)
-//   2. Falls back to JSONP-style script injection for GET requests
+// Apps Script Web Apps return a 302 redirect which breaks fetch().
+// JSONP (script tag injection) bypasses this entirely — no CORS, no redirect issues.
 
-async function apiGet(params) {
-  const qs = new URLSearchParams(params).toString();
-  const url = `${API_URL}?${qs}`;
-  
-  try {
-    // Strategy 1: Standard fetch
-    const res = await fetch(url, { redirect: 'follow' });
-    if (res.ok) return await res.json();
-    // If we get an opaque response, fall through to JSONP
-  } catch(e) {
-    console.log('fetch failed, trying JSONP:', e.message);
-  }
-  
-  // Strategy 2: JSONP-style via script tag
+let _jsonpCounter = 0;
+
+function apiGet(params) {
   return new Promise((resolve, reject) => {
-    const cbName = '_apicb_' + Date.now();
-    // Add callback param — our Apps Script doGet will wrap response if present
-    // But since our doGet doesn't support JSONP, we'll use an iframe approach instead
+    const cbName = '_vc_cb_' + (++_jsonpCounter) + '_' + Date.now();
+    params.callback = cbName;
     
-    // Strategy 2b: Hidden iframe fetch
-    // Actually, let's just try fetch again with no-cors and parse
-    // The most reliable fallback: create a hidden script element
+    const qs = new URLSearchParams(params).toString();
+    const script = document.createElement('script');
+    script.src = `${API_URL}?${qs}`;
     
-    // Final reliable approach: XMLHttpRequest which handles redirects better
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.onload = function() {
-      try { resolve(JSON.parse(xhr.responseText)); }
-      catch(e) { reject(new Error('Invalid response from server')); }
+    // Set up the callback
+    window[cbName] = function(data) {
+      resolve(data);
+      // Clean up
+      delete window[cbName];
+      document.head.removeChild(script);
     };
-    xhr.onerror = function() { reject(new Error('Network error')); };
-    xhr.send();
+    
+    script.onerror = function() {
+      reject(new Error('Network error — could not reach server'));
+      delete window[cbName];
+      document.head.removeChild(script);
+    };
+    
+    // 15 second timeout
+    setTimeout(() => {
+      if (window[cbName]) {
+        reject(new Error('Request timed out'));
+        delete window[cbName];
+        if (script.parentNode) document.head.removeChild(script);
+      }
+    }, 15000);
+    
+    document.head.appendChild(script);
   });
 }
 
 async function apiPost(payload) {
+  // POST still uses fetch — Apps Script handles POST redirects differently
+  // We send to the /exec URL; the 302 redirect is followed automatically for POST
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
