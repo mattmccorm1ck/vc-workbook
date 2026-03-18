@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vic Canever — Contract Workbook</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════════════
+   PASTE YOUR DEPLOYED APPS SCRIPT WEB APP URL BELOW
+   ════════════════════════════════════════════════════════════ */
+:root{
+  /* ── EDIT THIS ── */
+  --api-url: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+  
+  /* ── Theme ── */
+  --navy:#1a1a2e;--navy-light:#242443;--navy-mid:#2d2d52;
+  --gold:#d4a843;--gold-dim:rgba(212,168,67,.15);
+  --text:#e8e6e1;--text-dim:#9a9890;--text-dark:#6b6960;
+  --bg:#111120;
+  --red:#ff5555;--orange:#e68c28;--green:#3cb464;--blue:#3c82dc;--purple:#8c50c8;
+  --red-bg:rgba(220,60,60,.12);--orange-bg:rgba(230,140,40,.12);
+  --green-bg:rgba(60,180,100,.12);--blue-bg:rgba(60,130,220,.12);--purple-bg:rgba(140,80,200,.12);
+  --radius:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.45;min-height:100vh}
+
+/* ── LOGIN ── */
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--navy-light);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:40px;width:100%;max-width:380px;text-align:center}
+.login-box .brand-mark{width:56px;height:56px;background:var(--gold);border-radius:10px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);font-size:22px;margin-bottom:16px}
+.login-box h1{font-size:20px;color:var(--gold);margin-bottom:4px}
+.login-box .sub{color:var(--text-dim);font-size:13px;margin-bottom:28px}
+.login-box input{display:block;width:100%;background:var(--navy-mid);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:10px 14px;border-radius:var(--radius);font-size:14px;font-family:inherit;margin-bottom:12px;outline:none;transition:border .2s}
+.login-box input:focus{border-color:var(--gold)}
+.login-box input::placeholder{color:var(--text-dark)}
+.login-btn{width:100%;padding:11px;background:var(--gold);color:var(--navy);border:none;border-radius:var(--radius);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.login-btn:hover{opacity:.9}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{color:var(--red);font-size:12px;margin-top:10px;min-height:18px}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,var(--navy) 0%,var(--navy-light) 100%);border-bottom:2px solid var(--gold);padding:18px 24px;position:sticky;top:0;z-index:100}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .bm{width:36px;height:36px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--navy);font-size:15px}
+.brand h1{font-size:18px;font-weight:700;color:var(--gold)}
+.brand .sub{font-size:12px;color:var(--text-dim);font-weight:400}
+.header-right{display:flex;align-items:center;gap:12px}
+.refresh-info{font-size:10px;color:var(--text-dark)}
+.logout-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;transition:all .2s}
+.logout-btn:hover{border-color:var(--gold);color:var(--gold)}
+.stats-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.stat-pill{background:var(--navy-mid);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:4px 11px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px}
+.stat-pill .num{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--gold)}
+
+/* ── CONTROLS ── */
+.controls{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-btn{background:var(--navy-light);border:1px solid rgba(255,255,255,.08);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit}
+.filter-btn:hover{border-color:var(--gold);color:var(--gold)}
+.filter-btn.active{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.search-box{background:var(--navy-light);border:1px solid rgba(255,255,255,.08);color:var(--text);padding:5px 12px;border-radius:20px;font-size:11px;font-family:inherit;width:180px;outline:none}
+.search-box:focus{border-color:var(--gold)}
+.search-box::placeholder{color:var(--text-dark)}
+.sep{width:1px;height:18px;background:rgba(255,255,255,.1);margin:0 2px}
+
+/* ── TABLE ── */
+.container{max-width:1100px;margin:0 auto;padding:0 24px 50px}
+.count-label{color:var(--text-dark);font-size:11px;padding:8px 0 4px;font-weight:500}
+.table-wrap{border-radius:var(--radius);border:1px solid rgba(255,255,255,.06)}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+thead th{background:var(--navy-light);color:var(--text-dim);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:8px 8px;text-align:left;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.08);cursor:pointer;user-select:none;overflow:hidden}
+thead th:hover{color:var(--gold)}
+thead th .sa{margin-left:3px;font-size:8px;opacity:.4}
+thead th.sorted .sa{opacity:1;color:var(--gold)}
+tbody tr.main-row{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;cursor:pointer}
+tbody tr.main-row:hover{background:rgba(212,168,67,.04)}
+tbody td{padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.cname{font-weight:600}
+.veh{color:var(--text-dim);font-size:11px}
+.b{display:inline-block;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.3px}
+.b-l{background:var(--blue-bg);color:var(--blue)}.b-f{background:var(--purple-bg);color:var(--purple)}
+.u-hot{color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace;font-size:11px}
+.u-warm{color:var(--orange);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:11px}
+.u-cool{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px}
+.ds{font-family:'JetBrains Mono',monospace;font-size:11px}
+.ds.stale{color:var(--red)}.ds.aging{color:var(--orange)}.ds.fresh{color:var(--green)}
+.status-select{appearance:none;-webkit-appearance:none;background:var(--navy-mid);border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:4px 22px 4px 8px;border-radius:5px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;transition:all .2s;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%239a9890'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center}
+.status-select:focus{outline:none;border-color:var(--gold)}
+.status-select.s-c{background-color:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.status-select.s-w{background-color:var(--orange-bg);border-color:var(--orange);color:var(--orange)}
+.status-select.s-a{background-color:var(--green-bg);border-color:var(--green);color:var(--green)}
+.notes-input{background:transparent;border:1px solid transparent;color:var(--text-dim);padding:3px 6px;border-radius:4px;font-size:11px;font-family:inherit;width:100%;transition:all .2s}
+.notes-input:hover{border-color:rgba(255,255,255,.1)}
+.notes-input:focus{outline:none;border-color:var(--gold);color:var(--text);background:var(--navy-mid)}
+.detail-row{display:none}
+.detail-row.open{display:table-row}
+.detail-row td{padding:0 8px 10px 8px;background:rgba(212,168,67,.02);border-bottom:1px solid rgba(255,255,255,.06)}
+.detail-grid{display:flex;gap:20px;flex-wrap:wrap;padding:6px 4px;font-size:11px}
+.detail-grid .dg-item{display:flex;gap:4px;align-items:baseline}
+.detail-grid .dg-label{color:var(--text-dark);font-size:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.detail-grid .dg-val{color:var(--text-dim);font-family:'JetBrains Mono',monospace;font-size:11px}
+.expand-icon{display:inline-block;width:14px;font-size:10px;color:var(--text-dark);transition:transform .2s;text-align:center}
+.main-row.expanded .expand-icon{transform:rotate(90deg);color:var(--gold)}
+.dl{color:var(--gold);text-decoration:none;font-size:14px;opacity:.6;transition:opacity .2s}
+.dl:hover{opacity:1}
+
+/* ── MANAGER DASHBOARD ── */
+.mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:20px 0}
+.mgr-card{background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;transition:border-color .2s;cursor:pointer}
+.mgr-card:hover{border-color:var(--gold)}
+.mgr-card h3{font-size:15px;color:var(--text);margin-bottom:10px;font-weight:600}
+.mgr-card .mgr-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;font-size:12px}
+.mgr-card .mgr-stat{display:flex;justify-content:space-between}
+.mgr-card .mgr-stat .label{color:var(--text-dark)}
+.mgr-card .mgr-stat .val{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text-dim)}
+.mgr-card .mgr-stat .val.hot{color:var(--red)}
+.mgr-card .mgr-stat .val.warn{color:var(--orange)}
+.mgr-card .mgr-stat .val.good{color:var(--green)}
+.mgr-card .progress-bar{margin-top:12px;height:6px;background:var(--navy-mid);border-radius:3px;overflow:hidden;display:flex}
+.mgr-card .progress-bar .seg{height:100%;transition:width .3s}
+.mgr-card .progress-bar .seg-c{background:var(--blue)}
+.mgr-card .progress-bar .seg-w{background:var(--orange)}
+.mgr-card .progress-bar .seg-a{background:var(--green)}
+.mgr-back-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:5px 14px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;margin-bottom:12px;transition:all .2s}
+.mgr-back-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:60px 20px;color:var(--text-dim)}
+.loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--navy-mid);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.footer{text-align:center;padding:16px;color:var(--text-dark);font-size:10px}
+
+.hidden{display:none!important}
+@media(max-width:700px){
+  .header{padding:12px}
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .controls{padding:8px 12px}
+  .container{padding:0 6px 30px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ LOGIN SCREEN ════════════ -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-box">
+    <div class="brand-mark">VC</div>
+    <h1>Contract Workbook</h1>
+    <div class="sub">Vic Canever Chevrolet</div>
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+    <button class="login-btn" id="loginBtn" onclick="doLogin()">Sign In</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ════════════ APP (hidden until login) ════════════ -->
+<div id="appScreen" class="hidden">
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="bm">VC</div>
+        <div><h1 id="appTitle"></h1><div class="sub">Contract Expiration Workbook</div></div>
+      </div>
+      <div class="header-right">
+        <div class="refresh-info" id="refreshInfo"></div>
+        <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="stats-row" id="statsRow"></div>
+    </div>
+  </div>
+
+  <!-- Manager Dashboard -->
+  <div id="mgrDashboard" class="hidden">
+    <div class="container">
+      <div class="mgr-grid" id="mgrGrid"></div>
+    </div>
+  </div>
+
+  <!-- Salesperson Workbook -->
+  <div id="workbook" class="hidden">
+    <div class="controls" id="controls">
+      <button class="mgr-back-btn hidden" id="mgrBackBtn" onclick="showManagerDashboard()">← All Reps</button>
+      <input type="text" class="search-box" id="searchBox" placeholder="Search customer / vehicle…">
+      <button class="filter-btn active" data-f="all" onclick="sf('all',this)">All</button>
+      <button class="filter-btn" data-f="lease" onclick="sf('lease',this)">Lease</button>
+      <button class="filter-btn" data-f="finance" onclick="sf('finance',this)">Finance</button>
+      <span class="sep"></span>
+      <button class="filter-btn" data-f="hot" onclick="sf('hot',this)">🔥 &lt;90d</button>
+      <button class="filter-btn" data-f="warm" onclick="sf('warm',this)">⏳ 90-180d</button>
+      <span class="sep"></span>
+      <button class="filter-btn" data-f="untouched" onclick="sf('untouched',this)">⚠️ No Contact 60+d</button>
+      <span class="sep"></span>
+      <button class="filter-btn" data-f="s-none" onclick="sf('s-none',this)">No Status</button>
+      <button class="filter-btn" data-f="s-contacted" onclick="sf('s-contacted',this)">Contacted</button>
+      <button class="filter-btn" data-f="s-working" onclick="sf('s-working',this)">Working</button>
+      <button class="filter-btn" data-f="s-appointed" onclick="sf('s-appointed',this)">Appointed</button>
+    </div>
+    <div class="container">
+      <div class="count-label" id="countLabel"></div>
+      <div class="table-wrap">
+        <table>
+          <colgroup>
+            <col style="width:18px"><col style="width:108px"><col style="width:58px">
+            <col style="width:auto"><col style="width:auto"><col style="width:48px">
+            <col style="width:56px"><col style="width:72px"><col style="width:58px">
+            <col style="width:auto"><col style="width:32px">
+          </colgroup>
+          <thead><tr>
+            <th></th>
+            <th data-col="status">Status<span class="sa">▲</span></th>
+            <th data-col="daysToExp">Days<span class="sa">▲</span></th>
+            <th data-col="customer">Customer<span class="sa">▲</span></th>
+            <th data-col="vehicle">Vehicle<span class="sa">▲</span></th>
+            <th data-col="pmtMethod">Type<span class="sa">▲</span></th>
+            <th data-col="monthlyPmt">Pmt<span class="sa">▲</span></th>
+            <th data-col="payoffDate">Payoff<span class="sa">▲</span></th>
+            <th data-col="daysSince">Contact<span class="sa">▲</span></th>
+            <th>Notes</th>
+            <th title="Open in VinSolutions">VS</th>
+          </tr></thead>
+          <tbody id="tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingIndicator" class="loading hidden">
+    <div class="spinner"></div>
+    <div>Loading your workbook…</div>
+  </div>
+</div>
+
+<div class="footer">Vic Canever Chevrolet &mdash; Contract Expiration Workbook</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG — Update this after deploying Apps Script
+// ═══════════════════════════════════════════════════════════
+const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const VIN_BASE = 'https://vinsolutions.app.coxautoinc.com/vinconnect/#/CarDashboard/Pages/LeadManagement/ActiveLeadsLayout.aspx?SelectedTab=t_ILM&leftpaneframe=Hide&rightpaneframe=../CRM/CustomerDashboard.aspx?GlobalCustomerID=';
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let session = null;  // { token, role, repName, displayName }
+let records = [];
+let statuses = {};
+let currentFilter = 'all';
+let currentSort = { col: 'daysToExp', dir: 'asc' };
+let searchTerm = '';
+let openRows = new Set();
+let saveQueue = {};
+let saveTimer = null;
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function checkSession() {
+  const saved = localStorage.getItem('vc_session');
+  if (saved) {
+    try {
+      session = JSON.parse(saved);
+      showApp();
+    } catch(e) {
+      localStorage.removeItem('vc_session');
+    }
+  }
+}
+
+async function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  
+  if (!user || !pass) { errEl.textContent = 'Enter username and password.'; return; }
+  
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  errEl.textContent = '';
+  
+  try {
+    const url = `${API_URL}?action=login&user=${encodeURIComponent(user)}&pass=${encodeURIComponent(pass)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.success) {
+      session = data;
+      localStorage.setItem('vc_session', JSON.stringify(session));
+      showApp();
+    } else {
+      errEl.textContent = data.error || 'Login failed.';
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Check the API URL.';
+  }
+  
+  btn.disabled = false;
+  btn.textContent = 'Sign In';
+}
+
+function doLogout() {
+  session = null;
+  records = [];
+  statuses = {};
+  localStorage.removeItem('vc_session');
+  document.getElementById('appScreen').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// Enter key to submit login
+document.getElementById('loginPass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('loginUser').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('loginPass').focus();
+});
+
+// ═══════════════════════════════════════════════════════════
+// APP INIT
+// ═══════════════════════════════════════════════════════════
+function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appScreen').classList.remove('hidden');
+  
+  if (session.role === 'manager') {
+    document.getElementById('appTitle').textContent = 'Manager Dashboard';
+    loadManagerDashboard();
+  } else {
+    document.getElementById('appTitle').textContent = session.repName;
+    loadWorkbook(session.repName);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MANAGER DASHBOARD
+// ═══════════════════════════════════════════════════════════
+async function loadManagerDashboard() {
+  showLoading(true);
+  document.getElementById('mgrDashboard').classList.remove('hidden');
+  document.getElementById('workbook').classList.add('hidden');
+  
+  try {
+    const url = `${API_URL}?action=manager&token=${encodeURIComponent(session.token)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.error) {
+      if (data.error.includes('session') || data.error.includes('Invalid')) { doLogout(); return; }
+      alert(data.error);
+      return;
+    }
+    
+    renderManagerDashboard(data.summary);
+  } catch(e) {
+    alert('Failed to load dashboard: ' + e.message);
+  }
+  
+  showLoading(false);
+}
+
+function renderManagerDashboard(summary) {
+  const grid = document.getElementById('mgrGrid');
+  
+  // Summary stats across all reps
+  const totals = summary.reduce((acc, r) => {
+    acc.total += r.total; acc.hot += r.hot; acc.contacted += r.contacted;
+    acc.working += r.working; acc.appointed += r.appointed; acc.noStatus += r.noStatus;
+    return acc;
+  }, { total:0, hot:0, contacted:0, working:0, appointed:0, noStatus:0 });
+  
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-pill"><span class="num">${totals.total}</span>Total</div>
+    <div class="stat-pill"><span class="num">${totals.hot}</span>🔥&lt;90d</div>
+    <div class="stat-pill"><span class="num">${totals.contacted}</span>Ctd</div>
+    <div class="stat-pill"><span class="num">${totals.working}</span>Wkg</div>
+    <div class="stat-pill"><span class="num">${totals.appointed}</span>Apt</div>
+    <div class="stat-pill"><span class="num">${totals.noStatus}</span>No Status</div>
+  `;
+  
+  grid.innerHTML = summary.map(r => {
+    const pctC = r.total ? (r.contacted / r.total * 100) : 0;
+    const pctW = r.total ? (r.working / r.total * 100) : 0;
+    const pctA = r.total ? (r.appointed / r.total * 100) : 0;
+    return `
+    <div class="mgr-card" onclick="managerDrillDown('${r.name}')">
+      <h3>${r.name}</h3>
+      <div class="mgr-stats">
+        <div class="mgr-stat"><span class="label">Total</span><span class="val">${r.total}</span></div>
+        <div class="mgr-stat"><span class="label">Due &lt;90d</span><span class="val hot">${r.hot}</span></div>
+        <div class="mgr-stat"><span class="label">Contacted</span><span class="val">${r.contacted}</span></div>
+        <div class="mgr-stat"><span class="label">Working</span><span class="val">${r.working}</span></div>
+        <div class="mgr-stat"><span class="label">Appointed</span><span class="val good">${r.appointed}</span></div>
+        <div class="mgr-stat"><span class="label">No Status</span><span class="val ${r.noStatus > r.total * 0.5 ? 'warn' : ''}">${r.noStatus}</span></div>
+      </div>
+      <div class="progress-bar">
+        <div class="seg seg-c" style="width:${pctC}%"></div>
+        <div class="seg seg-w" style="width:${pctW}%"></div>
+        <div class="seg seg-a" style="width:${pctA}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function managerDrillDown(repName) {
+  document.getElementById('mgrDashboard').classList.add('hidden');
+  document.getElementById('mgrBackBtn').classList.remove('hidden');
+  document.getElementById('appTitle').textContent = repName;
+  loadWorkbook(repName);
+}
+
+function showManagerDashboard() {
+  document.getElementById('workbook').classList.add('hidden');
+  document.getElementById('mgrBackBtn').classList.add('hidden');
+  document.getElementById('appTitle').textContent = 'Manager Dashboard';
+  loadManagerDashboard();
+}
+
+// ═══════════════════════════════════════════════════════════
+// WORKBOOK
+// ═══════════════════════════════════════════════════════════
+async function loadWorkbook(repName) {
+  showLoading(true);
+  document.getElementById('workbook').classList.remove('hidden');
+  
+  try {
+    const url = `${API_URL}?action=fetch&rep=${encodeURIComponent(repName)}&token=${encodeURIComponent(session.token)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    if (data.error) {
+      if (data.error.includes('session') || data.error.includes('Invalid')) { doLogout(); return; }
+      alert(data.error);
+      return;
+    }
+    
+    // Process records
+    statuses = data.statuses || {};
+    records = (data.records || []).map((r, i) => ({
+      _id: i,
+      customer: r.Customer || '',
+      dms: r.DMSSalesperson || '',
+      daysSince: r.DaysSinceContact != null ? Number(r.DaysSinceContact) : null,
+      lastContact: fmtDate(r.LastContact),
+      soldDate: fmtDate(r.SoldDate),
+      payoffDate: fmtDate(r.PayoffDate),
+      daysToExp: r.DaysToExpiry != null ? Number(r.DaysToExpiry) : null,
+      invType: r.InvType === 'N' ? 'New' : r.InvType === 'U' ? 'Used' : (r.InvType || ''),
+      pmtMethod: r.PaymentMethod === 'L' ? 'Lease' : r.PaymentMethod === 'F' ? 'Finance' : (r.PaymentMethod || ''),
+      monthlyPmt: r.MonthlyPmt != null ? '$' + Number(r.MonthlyPmt).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0}) : '',
+      term: r.ContractTerm != null ? Number(r.ContractTerm) : '',
+      apr: fmtAPR(r.APR),
+      year: r.Year || '',
+      make: r.Make || '',
+      model: r.Model || '',
+      finCo: r.FinCompany || '',
+      dashLink: r.GlobalCustomerID || '',
+      _v: `${r.Year || ''} ${r.Make || ''} ${r.Model || ''}`.trim(),
+      _s: (statuses[r.GlobalCustomerID] && statuses[r.GlobalCustomerID].status) || '',
+      _n: (statuses[r.GlobalCustomerID] && statuses[r.GlobalCustomerID].notes) || '',
+      _rep: repName,
+    }));
+    
+    document.getElementById('refreshInfo').textContent = data.lastRefresh ? `Data refreshed: ${fmtDate(data.lastRefresh)}` : '';
+    
+    // Bind sort headers
+    document.querySelectorAll('thead th[data-col]').forEach(th => {
+      th.onclick = function() {
+        const c = this.dataset.col;
+        currentSort = currentSort.col === c ? { col: c, dir: currentSort.dir === 'asc' ? 'desc' : 'asc' } : { col: c, dir: 'asc' };
+        document.querySelectorAll('thead th').forEach(h => h.classList.remove('sorted'));
+        this.classList.add('sorted');
+        this.querySelector('.sa').textContent = currentSort.dir === 'asc' ? '▲' : '▼';
+        render();
+      };
+    });
+    
+    document.getElementById('searchBox').oninput = function() { searchTerm = this.value.toLowerCase(); render(); };
+    
+    currentFilter = 'all';
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === 'all'));
+    openRows = new Set();
+    render();
+    
+  } catch(e) {
+    alert('Failed to load workbook: ' + e.message);
+  }
+  
+  showLoading(false);
+}
+
+// ── Render table ──
+function render() {
+  const fl = getSorted(getFiltered());
+  const tb = document.getElementById('tb');
+  const total = records.length;
+  const leases = records.filter(r => r.pmtMethod === 'Lease').length;
+  const hot = records.filter(r => r.daysToExp != null && r.daysToExp <= 90).length;
+  const cn = records.filter(r => r._s === 'contacted').length;
+  const wk = records.filter(r => r._s === 'working').length;
+  const ap = records.filter(r => r._s === 'appointed').length;
+  
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-pill"><span class="num">${total}</span>Total</div>
+    <div class="stat-pill"><span class="num">${leases}</span>Lease</div>
+    <div class="stat-pill"><span class="num">${total-leases}</span>Fin</div>
+    <div class="stat-pill"><span class="num">${hot}</span>🔥&lt;90d</div>
+    <div class="stat-pill"><span class="num">${cn}</span>Ctd</div>
+    <div class="stat-pill"><span class="num">${wk}</span>Wkg</div>
+    <div class="stat-pill"><span class="num">${ap}</span>Apt</div>
+  `;
+  document.getElementById('countLabel').textContent = `Showing ${fl.length} of ${total}`;
+  
+  tb.innerHTML = fl.map(r => {
+    const isOpen = openRows.has(r._id);
+    return `<tr class="main-row${isOpen ? ' expanded' : ''}" onclick="toggleRow(${r._id},event)">
+      <td><span class="expand-icon">&#9654;</span></td>
+      <td onclick="event.stopPropagation()">
+        <select class="status-select ${sc(r._s)}" onchange="setStatus(${r._id},this.value,this)">
+          <option value=""${r._s === '' ? ' selected' : ''}>—</option>
+          <option value="contacted"${r._s === 'contacted' ? ' selected' : ''}>Contacted</option>
+          <option value="working"${r._s === 'working' ? ' selected' : ''}>Working</option>
+          <option value="appointed"${r._s === 'appointed' ? ' selected' : ''}>Appointed</option>
+        </select>
+      </td>
+      <td class="${uc(r.daysToExp)}">${r.daysToExp != null ? r.daysToExp + 'd' : '—'}</td>
+      <td class="cname">${r.customer}</td>
+      <td class="veh">${r._v}</td>
+      <td>${r.pmtMethod === 'Lease' ? '<span class="b b-l">L</span>' : '<span class="b b-f">F</span>'}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.monthlyPmt}</td>
+      <td style="font-size:11px">${r.payoffDate}</td>
+      <td class="ds ${dc(r.daysSince)}">${r.daysSince != null ? r.daysSince + 'd' : '—'}</td>
+      <td onclick="event.stopPropagation()"><input type="text" class="notes-input" value="${(r._n||'').replace(/"/g,'&quot;')}" placeholder="Note…" onchange="setNote(${r._id},this.value)"></td>
+      <td onclick="event.stopPropagation()">${r.dashLink ? '<a class="dl" href="'+VIN_BASE+r.dashLink+'" target="_blank" title="Open in VinSolutions">↗</a>' : ''}</td>
+    </tr>
+    <tr class="detail-row${isOpen ? ' open' : ''}" id="dr${r._id}">
+      <td colspan="11">
+        <div class="detail-grid">
+          <div class="dg-item"><span class="dg-label">Orig&nbsp;Rep:</span><span class="dg-val">${r.dms}</span></div>
+          <div class="dg-item"><span class="dg-label">Sold:</span><span class="dg-val">${r.soldDate}</span></div>
+          <div class="dg-item"><span class="dg-label">Term:</span><span class="dg-val">${r.term}${r.term ? 'mo' : ''}</span></div>
+          <div class="dg-item"><span class="dg-label">APR:</span><span class="dg-val">${r.apr}</span></div>
+          <div class="dg-item"><span class="dg-label">N/U:</span><span class="dg-val">${r.invType}</span></div>
+          <div class="dg-item"><span class="dg-label">Lender:</span><span class="dg-val">${r.finCo}</span></div>
+          <div class="dg-item"><span class="dg-label">Last&nbsp;Contact:</span><span class="dg-val">${r.lastContact}</span></div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Status & Notes (debounced save to server) ──
+function setStatus(id, val, el) {
+  records[id]._s = val;
+  el.className = 'status-select ' + sc(val);
+  queueSave(records[id]);
+  render();
+}
+
+function setNote(id, val) {
+  records[id]._n = val;
+  queueSave(records[id]);
+}
+
+function queueSave(record) {
+  saveQueue[record.dashLink] = { customerID: record.dashLink, status: record._s, notes: record._n };
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSaves, 1500);  // Batch saves with 1.5s debounce
+}
+
+async function flushSaves() {
+  const updates = Object.values(saveQueue);
+  if (updates.length === 0) return;
+  saveQueue = {};
+  
+  try {
+    const rep = records[0] ? records[0]._rep : session.repName;
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },  // Apps Script requires text/plain for CORS
+      body: JSON.stringify({
+        action: 'batchSave',
+        token: session.token,
+        rep: rep,
+        updates: updates,
+      })
+    });
+  } catch(e) {
+    console.error('Save failed:', e);
+  }
+}
+
+// ── Filter / Sort helpers ──
+function sf(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function getFiltered() {
+  return records.filter(r => {
+    if (searchTerm) {
+      const h = (r.customer + ' ' + r._v + ' ' + r.dms).toLowerCase();
+      if (!h.includes(searchTerm)) return false;
+    }
+    switch(currentFilter) {
+      case 'lease': return r.pmtMethod === 'Lease';
+      case 'finance': return r.pmtMethod === 'Finance';
+      case 'hot': return r.daysToExp != null && r.daysToExp <= 90;
+      case 'warm': return r.daysToExp != null && r.daysToExp > 90 && r.daysToExp <= 180;
+      case 'untouched': return r.daysSince != null && r.daysSince >= 60;
+      case 's-none': return !r._s;
+      case 's-contacted': return r._s === 'contacted';
+      case 's-working': return r._s === 'working';
+      case 's-appointed': return r._s === 'appointed';
+      default: return true;
+    }
+  });
+}
+
+function getSorted(list) {
+  const c = currentSort.col, d = currentSort.dir === 'asc' ? 1 : -1;
+  return [...list].sort((a,b) => {
+    let va, vb;
+    if (c === 'vehicle') { va = a._v; vb = b._v; }
+    else if (c === 'status') { const o = {'':0,contacted:1,working:2,appointed:3}; va = o[a._s]||0; vb = o[b._s]||0; }
+    else { va = a[c]; vb = b[c]; }
+    if (va == null || va === '') va = c === 'daysToExp' || c === 'daysSince' ? 99999 : 'zzz';
+    if (vb == null || vb === '') vb = c === 'daysToExp' || c === 'daysSince' ? 99999 : 'zzz';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    return va < vb ? -1*d : va > vb ? 1*d : 0;
+  });
+}
+
+function toggleRow(id, e) { openRows.has(id) ? openRows.delete(id) : openRows.add(id); render(); }
+function uc(d) { if (d == null) return 'u-cool'; return d <= 90 ? 'u-hot' : d <= 180 ? 'u-warm' : 'u-cool'; }
+function dc(d) { if (d == null) return ''; return d >= 90 ? 'stale' : d >= 30 ? 'aging' : 'fresh'; }
+function sc(s) { return s === 'contacted' ? 's-c' : s === 'working' ? 's-w' : s === 'appointed' ? 's-a' : ''; }
+
+function fmtDate(v) {
+  if (!v) return '';
+  const d = new Date(v);
+  if (isNaN(d.getTime())) return String(v);
+  return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
+}
+function fmtAPR(a) {
+  if (a == null || a === '') return '';
+  const v = Number(a);
+  if (isNaN(v)) return String(a);
+  return v < 1 ? (v*100).toFixed(1)+'%' : v.toFixed(1)+'%';
+}
+function showLoading(show) {
+  document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
+}
+
+// ── Init ──
+checkSession();
+</script>
+</body>
+</html>
