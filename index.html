@@ -111,10 +111,10 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .dl:hover{opacity:1}
 
 /* ── TRADE PILL (in workbook row) ── */
-.trade-pill-col{width:52px;text-align:center}
-.trade-pill-hover{opacity:0;transition:opacity .15s;background:var(--navy-mid);border:1px solid rgba(255,255,255,.12);color:var(--text-dark);padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.trade-pill-col{width:64px;text-align:center;padding-left:4px;padding-right:4px}
+.trade-pill-hover{opacity:0;transition:opacity .15s;background:var(--navy-mid);border:1px solid rgba(255,255,255,.12);color:var(--text-dark);padding:2px 6px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;white-space:nowrap}
 .trade-pill-hover:hover{border-color:var(--teal);color:var(--teal)}
-.trade-pill-requested{background:var(--teal-bg);border:1px solid var(--teal);color:var(--teal);padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap;display:inline-block}
+.trade-pill-requested{background:var(--teal-bg);border:1px solid var(--teal);color:var(--teal);padding:2px 6px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap;display:inline-block}
 
 /* ── MANAGER DASHBOARD ── */
 .mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:20px 0}
@@ -304,7 +304,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
             <col style="width:18px"><col style="width:108px"><col style="width:58px">
             <col style="width:auto"><col style="width:auto"><col style="width:48px">
             <col style="width:56px"><col style="width:72px"><col style="width:58px">
-            <col style="width:auto"><col style="width:52px"><col style="width:32px">
+            <col style="width:auto"><col style="width:64px"><col style="width:38px">
           </colgroup>
           <thead><tr>
             <th></th>
@@ -317,8 +317,8 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
             <th data-col="payoffDate">Payoff<span class="sa">▲</span></th>
             <th data-col="daysSince">Contact<span class="sa">▲</span></th>
             <th>Notes</th>
-            <th class="trade-pill-col" title="Dealer Trade">Trade</th>
-            <th title="Open in VinSolutions">VS</th>
+            <th class="trade-pill-col" title="Dealer Trade" style="text-align:center">Trade</th>
+            <th title="Open in VinSolutions" style="text-align:center;width:38px">VS</th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
