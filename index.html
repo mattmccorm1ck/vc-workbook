@@ -493,11 +493,27 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tabWorkbook').classList.toggle('active', tab === 'workbook');
   document.getElementById('tabTrades').classList.toggle('active', tab === 'trades');
-  document.getElementById('workbook').classList.toggle('hidden', tab !== 'workbook');
+
+  // Manager top-level: toggle mgrDashboard vs dealerTrades
+  // Manager drill-down / salesperson: toggle workbook vs dealerTrades
+  const isMgrOverview = session.role === 'manager' && !document.getElementById('mgrBackBtn').classList.contains('hidden') === false
+    && document.getElementById('mgrDashboard').classList.contains('hidden') === false
+    || (session.role === 'manager' && currentRepName === '');
+
+  if (isMgrOverview) {
+    document.getElementById('mgrDashboard').classList.toggle('hidden', tab !== 'workbook');
+    document.getElementById('workbook').classList.add('hidden');
+  } else {
+    document.getElementById('workbook').classList.toggle('hidden', tab !== 'workbook');
+    document.getElementById('mgrDashboard').classList.add('hidden');
+  }
   document.getElementById('dealerTrades').classList.toggle('hidden', tab !== 'trades');
+
   if (tab === 'trades') {
     if (!tradesLoaded) {
-      loadTrades(currentRepName);
+      // Manager overview loads all trades (no rep); drill-down/rep loads by rep
+      const repForLoad = isMgrOverview ? '' : currentRepName;
+      loadTrades(repForLoad);
     } else {
       renderTradesTab();
     }
@@ -509,7 +525,12 @@ function switchTab(tab) {
 // ═══════════════════════════════════════════════════════════
 async function loadManagerDashboard() {
   showLoading(true);
-  hideTabBar();
+  // Show tab bar with "Rep Overview" label for manager top-level
+  document.getElementById('tabWorkbook').textContent = 'Rep Overview';
+  document.getElementById('tabWorkbook').classList.add('active');
+  document.getElementById('tabTrades').classList.remove('active');
+  currentTab = 'workbook';
+  showTabBar();
   document.getElementById('mgrDashboard').classList.remove('hidden');
   document.getElementById('workbook').classList.add('hidden');
   document.getElementById('dealerTrades').classList.add('hidden');
@@ -565,10 +586,13 @@ function managerDrillDown(repName) {
   document.getElementById('mgrDashboard').classList.add('hidden');
   document.getElementById('mgrBackBtn').classList.remove('hidden');
   document.getElementById('appTitle').textContent = repName;
+  // Relabel first tab to Workbook for drill-down context
+  document.getElementById('tabWorkbook').textContent = 'Workbook';
   showTabBar();
   // Reset trades state for the new rep
   tradeRequests = {}; tradesLoaded = false; showTradeForm = false; tradeFormPrefill = null;
   currentTab = 'workbook';
+  currentRepName = repName;
   document.getElementById('tabWorkbook').classList.add('active');
   document.getElementById('tabTrades').classList.remove('active');
   document.getElementById('dealerTrades').classList.add('hidden');
@@ -580,6 +604,8 @@ function showManagerDashboard() {
   document.getElementById('dealerTrades').classList.add('hidden');
   document.getElementById('mgrBackBtn').classList.add('hidden');
   document.getElementById('appTitle').textContent = 'Manager Dashboard';
+  document.getElementById('tabWorkbook').textContent = 'Rep Overview';
+  currentRepName = '';
   tradeRequests = {}; tradesLoaded = false;
   loadManagerDashboard();
 }
@@ -797,8 +823,8 @@ function sc(s){ return s==='contacted'?'s-c':s==='working'?'s-w':s==='appointed'
 async function loadTrades(repName) {
   try {
     let data;
-    if (session.role === 'manager' && !repName) {
-      // Manager: load all trades (no rep param)
+    if (!repName) {
+      // Manager overview: fetch all open trades across all reps
       data = await apiGet({ action: 'getTrades', token: session.token });
     } else {
       data = await apiGet({ action: 'getTrades', rep: repName, token: session.token });
