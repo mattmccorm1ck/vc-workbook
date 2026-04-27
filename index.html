@@ -6,14 +6,7 @@
 <title>Vic Canever — Contract Workbook</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ════════════════════════════════════════════════════════════
-   PASTE YOUR DEPLOYED APPS SCRIPT WEB APP URL BELOW
-   ════════════════════════════════════════════════════════════ */
 :root{
-  /* ── EDIT THIS ── */
-  --api-url: "https://script.google.com/macros/s/AKfycbxVGdx9B0fzFmDkrfMKvIdfSQRiYWAHQ8lXmJXawVhx4d2LK4dgX7vAQ1V_wTuJ-q1TGA/exec";
-  
-  /* ── Theme ── */
   --navy:#1a1a2e;--navy-light:#242443;--navy-mid:#2d2d52;
   --gold:#d4a843;--gold-dim:rgba(212,168,67,.15);
   --text:#e8e6e1;--text-dim:#9a9890;--text-dark:#6b6960;
@@ -21,6 +14,7 @@
   --red:#ff5555;--orange:#e68c28;--green:#3cb464;--blue:#3c82dc;--purple:#8c50c8;
   --red-bg:rgba(220,60,60,.12);--orange-bg:rgba(230,140,40,.12);
   --green-bg:rgba(60,180,100,.12);--blue-bg:rgba(60,130,220,.12);--purple-bg:rgba(140,80,200,.12);
+  --teal:#2ab8a0;--teal-bg:rgba(42,184,160,.12);
   --radius:8px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -55,6 +49,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);lin
 .stat-pill{background:var(--navy-mid);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:4px 11px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:5px}
 .stat-pill .num{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--gold)}
 
+/* ── TAB BAR ── */
+.tab-bar{max-width:1100px;margin:0 auto;padding:0 24px;display:flex;gap:2px;border-bottom:1px solid rgba(255,255,255,.06)}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text-dim);padding:10px 16px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-badge{background:var(--gold);color:var(--navy);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;min-width:18px;text-align:center}
+.tab-badge.zero{background:var(--navy-mid);color:var(--text-dark)}
+
 /* ── CONTROLS ── */
 .controls{max-width:1100px;margin:0 auto;padding:12px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .filter-btn{background:var(--navy-light);border:1px solid rgba(255,255,255,.08);color:var(--text-dim);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;font-family:inherit}
@@ -76,6 +78,7 @@ thead th .sa{margin-left:3px;font-size:8px;opacity:.4}
 thead th.sorted .sa{opacity:1;color:var(--gold)}
 tbody tr.main-row{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s;cursor:pointer}
 tbody tr.main-row:hover{background:rgba(212,168,67,.04)}
+tbody tr.main-row:hover .trade-pill-hover{opacity:1}
 tbody td{padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .cname{font-weight:600}
 .veh{color:var(--text-dim);font-size:11px}
@@ -107,6 +110,12 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .dl{color:var(--gold);text-decoration:none;font-size:14px;opacity:.6;transition:opacity .2s}
 .dl:hover{opacity:1}
 
+/* ── TRADE PILL (in workbook row) ── */
+.trade-pill-col{width:52px;text-align:center}
+.trade-pill-hover{opacity:0;transition:opacity .15s;background:var(--navy-mid);border:1px solid rgba(255,255,255,.12);color:var(--text-dark);padding:2px 7px;border-radius:10px;font-size:9px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.trade-pill-hover:hover{border-color:var(--teal);color:var(--teal)}
+.trade-pill-requested{background:var(--teal-bg);border:1px solid var(--teal);color:var(--teal);padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;white-space:nowrap;display:inline-block}
+
 /* ── MANAGER DASHBOARD ── */
 .mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;padding:20px 0}
 .mgr-card{background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);padding:18px;transition:border-color .2s;cursor:pointer}
@@ -127,19 +136,94 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 .mgr-back-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:5px 14px;border-radius:20px;font-size:11px;font-family:inherit;cursor:pointer;margin-bottom:12px;transition:all .2s}
 .mgr-back-btn:hover{border-color:var(--gold);color:var(--gold)}
 
+/* ── DEALER TRADES TAB ── */
+.trades-container{max-width:1100px;margin:0 auto;padding:20px 24px 50px}
+
+/* Summary pills row */
+.sum-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.sum-pill{background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;display:flex;align-items:center;gap:6px}
+.sum-pill .num{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--teal)}
+
+/* New request button */
+.btn-new-trade{background:var(--teal-bg);border:1px solid var(--teal);color:var(--teal);padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;margin-bottom:20px}
+.btn-new-trade:hover{background:var(--teal);color:var(--navy)}
+
+/* Trade form */
+.form-wrap{background:var(--navy-light);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:20px;margin-bottom:20px}
+.form-wrap h3{font-size:13px;font-weight:700;color:var(--gold);margin-bottom:14px;text-transform:uppercase;letter-spacing:.5px}
+.prefill-bar{background:var(--gold-dim);border:1px solid rgba(212,168,67,.3);border-radius:6px;padding:7px 12px;font-size:11px;color:var(--gold);margin-bottom:14px}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dark);margin-bottom:8px;margin-top:14px}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.form-row.cols3 .field{flex:1;min-width:120px}
+.form-row.cols4 .field{flex:1;min-width:100px}
+.form-row.cols2 .field{flex:1;min-width:140px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;font-weight:600;color:var(--text-dark);text-transform:uppercase;letter-spacing:.4px}
+.field input,.field select,.field textarea{background:var(--navy-mid);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:7px 10px;border-radius:5px;font-size:12px;font-family:inherit;outline:none;transition:border .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-dark)}
+.field select{appearance:none;-webkit-appearance:none;cursor:pointer;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%239a9890'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.field select option{background:var(--navy-mid)}
+.field textarea{resize:vertical;min-height:56px}
+.form-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+.btn-cancel{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dim);padding:7px 18px;border-radius:6px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--red);color:var(--red)}
+.btn-submit{background:var(--gold);color:var(--navy);border:none;padding:7px 20px;border-radius:6px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;transition:opacity .2s}
+.btn-submit:hover{opacity:.9}
+.btn-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* Trade cards — salesperson view */
+.trade-card{background:var(--navy-light);border:1px solid rgba(255,255,255,.06);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.trade-card-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:background .15s}
+.trade-card-head:hover{background:rgba(255,255,255,.02)}
+.trade-card-head .tc-left{display:flex;align-items:center;gap:10px}
+.trade-card-head .tc-cust{font-weight:600;font-size:13px}
+.trade-card-head .tc-veh{font-size:11px;color:var(--text-dim)}
+.trade-card-head .tc-right{display:flex;align-items:center;gap:10px}
+.trade-card-head .tc-date{font-size:10px;color:var(--text-dark);font-family:'JetBrains Mono',monospace}
+.badge-open{background:var(--teal-bg);border:1px solid var(--teal);color:var(--teal);border-radius:10px;padding:1px 8px;font-size:10px;font-weight:700}
+.tc-expand{font-size:10px;color:var(--text-dark);transition:transform .2s;display:inline-block}
+.trade-card.open .tc-expand{transform:rotate(90deg);color:var(--gold)}
+.trade-card-body{display:none;padding:0 16px 14px}
+.trade-card.open .trade-card-body{display:block}
+.cust-grid,.want-grid{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px}
+.cust-item,.want-item{display:flex;flex-direction:column;gap:2px}
+.cust-item .ci-label,.want-item .wi-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text-dark)}
+.cust-item .ci-val,.want-item .wi-val{font-size:12px;color:var(--text-dim);font-family:'JetBrains Mono',monospace}
+.tc-notes{background:var(--navy-mid);border-radius:5px;padding:8px 10px;font-size:11px;color:var(--text-dim);margin-bottom:10px;font-style:italic}
+.btn-remove{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dark);padding:4px 12px;border-radius:5px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s}
+.btn-remove:hover{border-color:var(--red);color:var(--red)}
+
+/* Manager trades view */
+.mgr-rep-section{margin-bottom:24px}
+.mgr-rep-header{font-size:12px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.mgr-rep-header .rh-count{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:11px}
+.mgr-trade-row{background:var(--navy-light);border:1px solid rgba(255,255,255,.05);border-radius:6px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.mgr-trade-info{flex:1;min-width:200px}
+.mgr-trade-cust{font-weight:600;font-size:12px;margin-bottom:3px}
+.mgr-trade-veh{font-size:11px;color:var(--text-dim);margin-bottom:3px}
+.mgr-trade-want{font-size:11px;color:var(--teal)}
+.mgr-trade-meta{font-size:10px;color:var(--text-dark);font-family:'JetBrains Mono',monospace;margin-top:4px}
+.mgr-trade-notes{font-size:10px;color:var(--text-dim);margin-top:4px;font-style:italic}
+.mgr-dismiss-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--text-dark);padding:4px 12px;border-radius:5px;font-size:10px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.mgr-dismiss-btn:hover{border-color:var(--red);color:var(--red)}
+
+.no-trades{text-align:center;padding:40px 20px;color:var(--text-dark);font-size:13px}
+
 /* ── LOADING ── */
 .loading{text-align:center;padding:60px 20px;color:var(--text-dim)}
 .loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--navy-mid);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .footer{text-align:center;padding:16px;color:var(--text-dark);font-size:10px}
-
 .hidden{display:none!important}
+
 @media(max-width:700px){
   .header{padding:12px}
   .header-inner{flex-direction:column;align-items:flex-start}
-  .controls{padding:8px 12px}
-  .container{padding:0 6px 30px}
+  .controls,.tab-bar{padding:8px 12px}
+  .container,.trades-container{padding:0 6px 30px}
 }
 </style>
 </head>
@@ -176,14 +260,24 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
     </div>
   </div>
 
-  <!-- Manager Dashboard -->
+  <!-- Tab Bar (shown for salesperson and manager drill-down, hidden for mgr overview) -->
+  <div id="tabBar" class="hidden" style="background:var(--navy-light);border-bottom:1px solid rgba(255,255,255,.06)">
+    <div class="tab-bar">
+      <button class="tab active" id="tabWorkbook" onclick="switchTab('workbook')">Workbook</button>
+      <button class="tab" id="tabTrades" onclick="switchTab('trades')">
+        Dealer Trades <span class="tab-badge zero" id="tradeBadge">0</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Manager Overview Dashboard (no tabs — top-level view) -->
   <div id="mgrDashboard" class="hidden">
     <div class="container">
       <div class="mgr-grid" id="mgrGrid"></div>
     </div>
   </div>
 
-  <!-- Salesperson Workbook -->
+  <!-- Salesperson / Drill-down Workbook -->
   <div id="workbook" class="hidden">
     <div class="controls" id="controls">
       <button class="mgr-back-btn hidden" id="mgrBackBtn" onclick="showManagerDashboard()">← All Reps</button>
@@ -210,7 +304,7 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
             <col style="width:18px"><col style="width:108px"><col style="width:58px">
             <col style="width:auto"><col style="width:auto"><col style="width:48px">
             <col style="width:56px"><col style="width:72px"><col style="width:58px">
-            <col style="width:auto"><col style="width:32px">
+            <col style="width:auto"><col style="width:52px"><col style="width:32px">
           </colgroup>
           <thead><tr>
             <th></th>
@@ -223,12 +317,18 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
             <th data-col="payoffDate">Payoff<span class="sa">▲</span></th>
             <th data-col="daysSince">Contact<span class="sa">▲</span></th>
             <th>Notes</th>
+            <th class="trade-pill-col" title="Dealer Trade">Trade</th>
             <th title="Open in VinSolutions">VS</th>
           </tr></thead>
           <tbody id="tb"></tbody>
         </table>
       </div>
     </div>
+  </div>
+
+  <!-- Dealer Trades Tab Content -->
+  <div id="dealerTrades" class="hidden">
+    <div class="trades-container" id="tradesContent"></div>
   </div>
 
   <div id="loadingIndicator" class="loading hidden">
@@ -241,43 +341,33 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// CONFIG — Update this after deploying Apps Script
+// CONFIG
 // ═══════════════════════════════════════════════════════════
 const API_URL = 'https://script.google.com/macros/s/AKfycbxVGdx9B0fzFmDkrfMKvIdfSQRiYWAHQ8lXmJXawVhx4d2LK4dgX7vAQ1V_wTuJ-q1TGA/exec';
 const VIN_BASE = 'https://vinsolutions.app.coxautoinc.com/vinconnect/#/CarDashboard/Pages/LeadManagement/ActiveLeadsLayout.aspx?SelectedTab=t_ILM&leftpaneframe=Hide&rightpaneframe=../CRM/CustomerDashboard.aspx?GlobalCustomerID=';
 
 // ═══════════════════════════════════════════════════════════
-// API HELPER — uses JSONP to bypass CORS/redirect issues
+// API HELPERS — JSONP for GET, fetch for POST
 // ═══════════════════════════════════════════════════════════
-// Apps Script Web Apps return a 302 redirect which breaks fetch().
-// JSONP (script tag injection) bypasses this entirely — no CORS, no redirect issues.
-
 let _jsonpCounter = 0;
 
 function apiGet(params) {
   return new Promise((resolve, reject) => {
     const cbName = '_vc_cb_' + (++_jsonpCounter) + '_' + Date.now();
     params.callback = cbName;
-    
     const qs = new URLSearchParams(params).toString();
     const script = document.createElement('script');
     script.src = `${API_URL}?${qs}`;
-    
-    // Set up the callback
     window[cbName] = function(data) {
       resolve(data);
-      // Clean up
       delete window[cbName];
       document.head.removeChild(script);
     };
-    
     script.onerror = function() {
       reject(new Error('Network error — could not reach server'));
       delete window[cbName];
       document.head.removeChild(script);
     };
-    
-    // 15 second timeout
     setTimeout(() => {
       if (window[cbName]) {
         reject(new Error('Request timed out'));
@@ -285,14 +375,11 @@ function apiGet(params) {
         if (script.parentNode) document.head.removeChild(script);
       }
     }, 15000);
-    
     document.head.appendChild(script);
   });
 }
 
 async function apiPost(payload) {
-  // POST still uses fetch — Apps Script handles POST redirects differently
-  // We send to the /exec URL; the 302 redirect is followed automatically for POST
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -310,7 +397,7 @@ async function apiPost(payload) {
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let session = null;  // { token, role, repName, displayName }
+let session = null;
 let records = [];
 let statuses = {};
 let currentFilter = 'all';
@@ -319,6 +406,15 @@ let searchTerm = '';
 let openRows = new Set();
 let saveQueue = {};
 let saveTimer = null;
+let currentTab = 'workbook';   // 'workbook' | 'trades'
+let currentRepName = '';       // rep whose workbook is loaded
+
+// Dealer Trades state
+let tradeRequests = {};        // keyed by GlobalCustomerID → trade object
+let tradesLoaded = false;
+let openTradeCards = new Set();
+let showTradeForm = false;
+let tradeFormPrefill = null;   // null = fresh, or record object from workbook row
 
 // ═══════════════════════════════════════════════════════════
 // AUTH
@@ -329,9 +425,7 @@ function checkSession() {
     try {
       session = JSON.parse(saved);
       showApp();
-    } catch(e) {
-      localStorage.removeItem('vc_session');
-    }
+    } catch(e) { localStorage.removeItem('vc_session'); }
   }
 }
 
@@ -340,16 +434,12 @@ async function doLogin() {
   const pass = document.getElementById('loginPass').value.trim();
   const errEl = document.getElementById('loginError');
   const btn = document.getElementById('loginBtn');
-  
   if (!user || !pass) { errEl.textContent = 'Enter username and password.'; return; }
-  
   btn.disabled = true;
   btn.textContent = 'Signing in…';
   errEl.textContent = '';
-  
   try {
-    const data = await apiGet({ action: 'login', user: user, pass: pass });
-    
+    const data = await apiGet({ action: 'login', user, pass });
     if (data.success) {
       session = data;
       localStorage.setItem('vc_session', JSON.stringify(session));
@@ -359,29 +449,21 @@ async function doLogin() {
     }
   } catch(e) {
     errEl.textContent = 'Connection error: ' + e.message;
-    console.error('Login error:', e);
   }
-  
   btn.disabled = false;
   btn.textContent = 'Sign In';
 }
 
 function doLogout() {
-  session = null;
-  records = [];
-  statuses = {};
+  session = null; records = []; statuses = {};
+  tradeRequests = {}; tradesLoaded = false;
   localStorage.removeItem('vc_session');
   document.getElementById('appScreen').classList.add('hidden');
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 
-// Enter key to submit login
-document.getElementById('loginPass').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-document.getElementById('loginUser').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('loginPass').focus();
-});
+document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('loginPass').focus(); });
 
 // ═══════════════════════════════════════════════════════════
 // APP INIT
@@ -389,13 +471,36 @@ document.getElementById('loginUser').addEventListener('keydown', e => {
 function showApp() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appScreen').classList.remove('hidden');
-  
   if (session.role === 'manager') {
     document.getElementById('appTitle').textContent = 'Manager Dashboard';
     loadManagerDashboard();
   } else {
     document.getElementById('appTitle').textContent = session.repName;
+    showTabBar();
     loadWorkbook(session.repName);
+  }
+}
+
+function showTabBar() {
+  document.getElementById('tabBar').classList.remove('hidden');
+}
+
+function hideTabBar() {
+  document.getElementById('tabBar').classList.add('hidden');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabWorkbook').classList.toggle('active', tab === 'workbook');
+  document.getElementById('tabTrades').classList.toggle('active', tab === 'trades');
+  document.getElementById('workbook').classList.toggle('hidden', tab !== 'workbook');
+  document.getElementById('dealerTrades').classList.toggle('hidden', tab !== 'trades');
+  if (tab === 'trades') {
+    if (!tradesLoaded) {
+      loadTrades(currentRepName);
+    } else {
+      renderTradesTab();
+    }
   }
 }
 
@@ -404,36 +509,27 @@ function showApp() {
 // ═══════════════════════════════════════════════════════════
 async function loadManagerDashboard() {
   showLoading(true);
+  hideTabBar();
   document.getElementById('mgrDashboard').classList.remove('hidden');
   document.getElementById('workbook').classList.add('hidden');
-  
+  document.getElementById('dealerTrades').classList.add('hidden');
   try {
     const data = await apiGet({ action: 'manager', token: session.token });
-    
     if (data.error) {
       if (data.error.includes('session') || data.error.includes('Invalid')) { doLogout(); return; }
-      alert(data.error);
-      return;
+      alert(data.error); return;
     }
-    
     renderManagerDashboard(data.summary);
-  } catch(e) {
-    alert('Failed to load dashboard: ' + e.message);
-  }
-  
+  } catch(e) { alert('Failed to load dashboard: ' + e.message); }
   showLoading(false);
 }
 
 function renderManagerDashboard(summary) {
-  const grid = document.getElementById('mgrGrid');
-  
-  // Summary stats across all reps
   const totals = summary.reduce((acc, r) => {
     acc.total += r.total; acc.hot += r.hot; acc.contacted += r.contacted;
     acc.working += r.working; acc.appointed += r.appointed; acc.noStatus += r.noStatus;
     return acc;
   }, { total:0, hot:0, contacted:0, working:0, appointed:0, noStatus:0 });
-  
   document.getElementById('statsRow').innerHTML = `
     <div class="stat-pill"><span class="num">${totals.total}</span>Total</div>
     <div class="stat-pill"><span class="num">${totals.hot}</span>🔥&lt;90d</div>
@@ -442,13 +538,11 @@ function renderManagerDashboard(summary) {
     <div class="stat-pill"><span class="num">${totals.appointed}</span>Apt</div>
     <div class="stat-pill"><span class="num">${totals.noStatus}</span>No Status</div>
   `;
-  
-  grid.innerHTML = summary.map(r => {
+  document.getElementById('mgrGrid').innerHTML = summary.map(r => {
     const pctC = r.total ? (r.contacted / r.total * 100) : 0;
     const pctW = r.total ? (r.working / r.total * 100) : 0;
     const pctA = r.total ? (r.appointed / r.total * 100) : 0;
-    return `
-    <div class="mgr-card" onclick="managerDrillDown('${r.name}')">
+    return `<div class="mgr-card" onclick="managerDrillDown('${r.name}')">
       <h3>${r.name}</h3>
       <div class="mgr-stats">
         <div class="mgr-stat"><span class="label">Total</span><span class="val">${r.total}</span></div>
@@ -471,13 +565,22 @@ function managerDrillDown(repName) {
   document.getElementById('mgrDashboard').classList.add('hidden');
   document.getElementById('mgrBackBtn').classList.remove('hidden');
   document.getElementById('appTitle').textContent = repName;
+  showTabBar();
+  // Reset trades state for the new rep
+  tradeRequests = {}; tradesLoaded = false; showTradeForm = false; tradeFormPrefill = null;
+  currentTab = 'workbook';
+  document.getElementById('tabWorkbook').classList.add('active');
+  document.getElementById('tabTrades').classList.remove('active');
+  document.getElementById('dealerTrades').classList.add('hidden');
   loadWorkbook(repName);
 }
 
 function showManagerDashboard() {
   document.getElementById('workbook').classList.add('hidden');
+  document.getElementById('dealerTrades').classList.add('hidden');
   document.getElementById('mgrBackBtn').classList.add('hidden');
   document.getElementById('appTitle').textContent = 'Manager Dashboard';
+  tradeRequests = {}; tradesLoaded = false;
   loadManagerDashboard();
 }
 
@@ -485,19 +588,17 @@ function showManagerDashboard() {
 // WORKBOOK
 // ═══════════════════════════════════════════════════════════
 async function loadWorkbook(repName) {
+  currentRepName = repName;
   showLoading(true);
   document.getElementById('workbook').classList.remove('hidden');
-  
+  document.getElementById('dealerTrades').classList.add('hidden');
+
   try {
     const data = await apiGet({ action: 'fetch', rep: repName, token: session.token });
-    
     if (data.error) {
       if (data.error.includes('session') || data.error.includes('Invalid')) { doLogout(); return; }
-      alert(data.error);
-      return;
+      alert(data.error); return;
     }
-    
-    // Process records
     statuses = data.statuses || {};
     records = (data.records || []).map((r, i) => ({
       _id: i,
@@ -510,7 +611,7 @@ async function loadWorkbook(repName) {
       daysToExp: r.DaysToExpiry != null ? Number(r.DaysToExpiry) : null,
       invType: r.InvType === 'N' ? 'New' : r.InvType === 'U' ? 'Used' : (r.InvType || ''),
       pmtMethod: r.PaymentMethod === 'L' ? 'Lease' : r.PaymentMethod === 'F' ? 'Finance' : (r.PaymentMethod || ''),
-      monthlyPmt: r.MonthlyPmt != null ? '$' + Number(r.MonthlyPmt).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0}) : '',
+      monthlyPmt: r.MonthlyPmt != null ? '$' + Number(r.MonthlyPmt).toLocaleString(undefined, {minimumFractionDigits:0,maximumFractionDigits:0}) : '',
       term: r.ContractTerm != null ? Number(r.ContractTerm) : '',
       apr: fmtAPR(r.APR),
       year: r.Year || '',
@@ -523,10 +624,7 @@ async function loadWorkbook(repName) {
       _n: (statuses[r.GlobalCustomerID] && statuses[r.GlobalCustomerID].notes) || '',
       _rep: repName,
     }));
-    
     document.getElementById('refreshInfo').textContent = data.lastRefresh ? `Data refreshed: ${fmtDate(data.lastRefresh)}` : '';
-    
-    // Bind sort headers
     document.querySelectorAll('thead th[data-col]').forEach(th => {
       th.onclick = function() {
         const c = this.dataset.col;
@@ -537,22 +635,20 @@ async function loadWorkbook(repName) {
         render();
       };
     });
-    
     document.getElementById('searchBox').oninput = function() { searchTerm = this.value.toLowerCase(); render(); };
-    
     currentFilter = 'all';
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.f === 'all'));
     openRows = new Set();
     render();
-    
-  } catch(e) {
-    alert('Failed to load workbook: ' + e.message);
-  }
-  
+
+    // Load trades in background so pills populate
+    loadTrades(repName);
+
+  } catch(e) { alert('Failed to load workbook: ' + e.message); }
   showLoading(false);
 }
 
-// ── Render table ──
+// ── Render workbook table ──
 function render() {
   const fl = getSorted(getFiltered());
   const tb = document.getElementById('tb');
@@ -562,7 +658,6 @@ function render() {
   const cn = records.filter(r => r._s === 'contacted').length;
   const wk = records.filter(r => r._s === 'working').length;
   const ap = records.filter(r => r._s === 'appointed').length;
-  
   document.getElementById('statsRow').innerHTML = `
     <div class="stat-pill"><span class="num">${total}</span>Total</div>
     <div class="stat-pill"><span class="num">${leases}</span>Lease</div>
@@ -573,35 +668,45 @@ function render() {
     <div class="stat-pill"><span class="num">${ap}</span>Apt</div>
   `;
   document.getElementById('countLabel').textContent = `Showing ${fl.length} of ${total}`;
-  
+
   tb.innerHTML = fl.map(r => {
     const isOpen = openRows.has(r._id);
+    const hasTradeRequest = !!tradeRequests[r.dashLink];
+    const tradePillHtml = session.role === 'manager'
+      ? ''  // manager drill-down: no trade pill interaction
+      : hasTradeRequest
+        ? `<span class="trade-pill-requested" title="Trade request submitted">⇄ Req'd</span>`
+        : r.dashLink
+          ? `<button class="trade-pill-hover" onclick="event.stopPropagation();openTradeForm(${r._id})" title="Request dealer trade">⇄ Trade</button>`
+          : '';
+
     return `<tr class="main-row${isOpen ? ' expanded' : ''}" onclick="toggleRow(${r._id},event)">
       <td><span class="expand-icon">&#9654;</span></td>
       <td onclick="event.stopPropagation()">
         <select class="status-select ${sc(r._s)}" onchange="setStatus(${r._id},this.value,this)">
-          <option value=""${r._s === '' ? ' selected' : ''}>—</option>
-          <option value="contacted"${r._s === 'contacted' ? ' selected' : ''}>Contacted</option>
-          <option value="working"${r._s === 'working' ? ' selected' : ''}>Working</option>
-          <option value="appointed"${r._s === 'appointed' ? ' selected' : ''}>Appointed</option>
+          <option value=""${r._s===''?' selected':''}>—</option>
+          <option value="contacted"${r._s==='contacted'?' selected':''}>Contacted</option>
+          <option value="working"${r._s==='working'?' selected':''}>Working</option>
+          <option value="appointed"${r._s==='appointed'?' selected':''}>Appointed</option>
         </select>
       </td>
       <td class="${uc(r.daysToExp)}">${r.daysToExp != null ? r.daysToExp + 'd' : '—'}</td>
       <td class="cname">${r.customer}</td>
       <td class="veh">${r._v}</td>
-      <td>${r.pmtMethod === 'Lease' ? '<span class="b b-l">L</span>' : '<span class="b b-f">F</span>'}</td>
+      <td>${r.pmtMethod==='Lease'?'<span class="b b-l">L</span>':'<span class="b b-f">F</span>'}</td>
       <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${r.monthlyPmt}</td>
       <td style="font-size:11px">${r.payoffDate}</td>
       <td class="ds ${dc(r.daysSince)}">${r.daysSince != null ? r.daysSince + 'd' : '—'}</td>
       <td onclick="event.stopPropagation()"><input type="text" class="notes-input" value="${(r._n||'').replace(/"/g,'&quot;')}" placeholder="Note…" onchange="setNote(${r._id},this.value)"></td>
-      <td onclick="event.stopPropagation()">${r.dashLink ? '<a class="dl" href="'+VIN_BASE+r.dashLink+'" target="_blank" title="Open in VinSolutions">↗</a>' : ''}</td>
+      <td class="trade-pill-col" onclick="event.stopPropagation()">${tradePillHtml}</td>
+      <td onclick="event.stopPropagation()">${r.dashLink?'<a class="dl" href="'+VIN_BASE+r.dashLink+'" target="_blank" title="Open in VinSolutions">↗</a>':''}</td>
     </tr>
-    <tr class="detail-row${isOpen ? ' open' : ''}" id="dr${r._id}">
-      <td colspan="11">
+    <tr class="detail-row${isOpen?' open':''}" id="dr${r._id}">
+      <td colspan="12">
         <div class="detail-grid">
           <div class="dg-item"><span class="dg-label">Orig&nbsp;Rep:</span><span class="dg-val">${r.dms}</span></div>
           <div class="dg-item"><span class="dg-label">Sold:</span><span class="dg-val">${r.soldDate}</span></div>
-          <div class="dg-item"><span class="dg-label">Term:</span><span class="dg-val">${r.term}${r.term ? 'mo' : ''}</span></div>
+          <div class="dg-item"><span class="dg-label">Term:</span><span class="dg-val">${r.term}${r.term?'mo':''}</span></div>
           <div class="dg-item"><span class="dg-label">APR:</span><span class="dg-val">${r.apr}</span></div>
           <div class="dg-item"><span class="dg-label">N/U:</span><span class="dg-val">${r.invType}</span></div>
           <div class="dg-item"><span class="dg-label">Lender:</span><span class="dg-val">${r.finCo}</span></div>
@@ -612,51 +717,39 @@ function render() {
   }).join('');
 }
 
-// ── Status & Notes (debounced save to server) ──
+// ── Status & Notes ──
 function setStatus(id, val, el) {
   records[id]._s = val;
   el.className = 'status-select ' + sc(val);
   queueSave(records[id]);
   render();
 }
-
 function setNote(id, val) {
   records[id]._n = val;
   queueSave(records[id]);
 }
-
 function queueSave(record) {
   saveQueue[record.dashLink] = { customerID: record.dashLink, status: record._s, notes: record._n };
   if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(flushSaves, 1500);  // Batch saves with 1.5s debounce
+  saveTimer = setTimeout(flushSaves, 1500);
 }
-
 async function flushSaves() {
   const updates = Object.values(saveQueue);
   if (updates.length === 0) return;
   saveQueue = {};
-  
   try {
     const rep = records[0] ? records[0]._rep : session.repName;
-    await apiPost({
-      action: 'batchSave',
-      token: session.token,
-      rep: rep,
-      updates: updates,
-    });
-  } catch(e) {
-    console.error('Save failed:', e);
-  }
+    await apiPost({ action: 'batchSave', token: session.token, rep, updates });
+  } catch(e) { console.error('Save failed:', e); }
 }
 
-// ── Filter / Sort helpers ──
+// ── Filter / Sort ──
 function sf(f, btn) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
-
 function getFiltered() {
   return records.filter(r => {
     if (searchTerm) {
@@ -677,27 +770,354 @@ function getFiltered() {
     }
   });
 }
-
 function getSorted(list) {
   const c = currentSort.col, d = currentSort.dir === 'asc' ? 1 : -1;
   return [...list].sort((a,b) => {
     let va, vb;
     if (c === 'vehicle') { va = a._v; vb = b._v; }
-    else if (c === 'status') { const o = {'':0,contacted:1,working:2,appointed:3}; va = o[a._s]||0; vb = o[b._s]||0; }
+    else if (c === 'status') { const o={'':0,contacted:1,working:2,appointed:3}; va=o[a._s]||0; vb=o[b._s]||0; }
     else { va = a[c]; vb = b[c]; }
-    if (va == null || va === '') va = c === 'daysToExp' || c === 'daysSince' ? 99999 : 'zzz';
-    if (vb == null || vb === '') vb = c === 'daysToExp' || c === 'daysSince' ? 99999 : 'zzz';
-    if (typeof va === 'string') va = va.toLowerCase();
-    if (typeof vb === 'string') vb = vb.toLowerCase();
-    return va < vb ? -1*d : va > vb ? 1*d : 0;
+    if (va==null||va==='') va = c==='daysToExp'||c==='daysSince'?99999:'zzz';
+    if (vb==null||vb==='') vb = c==='daysToExp'||c==='daysSince'?99999:'zzz';
+    if (typeof va==='string') va=va.toLowerCase();
+    if (typeof vb==='string') vb=vb.toLowerCase();
+    return va<vb?-1*d:va>vb?1*d:0;
   });
 }
+function toggleRow(id) { openRows.has(id)?openRows.delete(id):openRows.add(id); render(); }
+function uc(d){ if(d==null)return 'u-cool'; return d<=90?'u-hot':d<=180?'u-warm':'u-cool'; }
+function dc(d){ if(d==null)return ''; return d>=90?'stale':d>=30?'aging':'fresh'; }
+function sc(s){ return s==='contacted'?'s-c':s==='working'?'s-w':s==='appointed'?'s-a':''; }
 
-function toggleRow(id, e) { openRows.has(id) ? openRows.delete(id) : openRows.add(id); render(); }
-function uc(d) { if (d == null) return 'u-cool'; return d <= 90 ? 'u-hot' : d <= 180 ? 'u-warm' : 'u-cool'; }
-function dc(d) { if (d == null) return ''; return d >= 90 ? 'stale' : d >= 30 ? 'aging' : 'fresh'; }
-function sc(s) { return s === 'contacted' ? 's-c' : s === 'working' ? 's-w' : s === 'appointed' ? 's-a' : ''; }
 
+// ═══════════════════════════════════════════════════════════
+// DEALER TRADES
+// ═══════════════════════════════════════════════════════════
+
+async function loadTrades(repName) {
+  try {
+    let data;
+    if (session.role === 'manager' && !repName) {
+      // Manager: load all trades (no rep param)
+      data = await apiGet({ action: 'getTrades', token: session.token });
+    } else {
+      data = await apiGet({ action: 'getTrades', rep: repName, token: session.token });
+    }
+    if (data.error) { console.warn('Trades load error:', data.error); return; }
+
+    // Build tradeRequests map keyed by GlobalCustomerID (from CustName isn't reliable — we use the trade ID prefix)
+    // The backend returns trade objects; we need to match them back to workbook rows.
+    // Trades have CustName but not GlobalCustomerID. We store them by a compound key and also
+    // build a by-custName index. The pill matching uses a by-custName approach since we don't
+    // store GlobalCustomerID in trade requests (by design in the punch list). We store by dashLink
+    // using a custName→dashLink reverse lookup from records[].
+    tradeRequests = {};
+    (data.trades || []).forEach(t => {
+      // Build a reverse map: custName → GlobalCustomerID from current records
+      const matchedRecord = records.find(r => r.customer === t.CustName);
+      const key = matchedRecord ? matchedRecord.dashLink : t.CustName;
+      if (key) tradeRequests[key] = t;
+    });
+
+    tradesLoaded = true;
+    updateTradeBadge();
+    render(); // re-render workbook pills
+
+    if (currentTab === 'trades') renderTradesTab();
+
+  } catch(e) { console.error('loadTrades failed:', e); }
+}
+
+function updateTradeBadge() {
+  const count = Object.keys(tradeRequests).length;
+  const badge = document.getElementById('tradeBadge');
+  if (badge) {
+    badge.textContent = count;
+    badge.className = 'tab-badge' + (count === 0 ? ' zero' : '');
+  }
+}
+
+function renderTradesTab() {
+  const el = document.getElementById('tradesContent');
+  const trades = Object.values(tradeRequests);
+  const isManager = session.role === 'manager';
+
+  if (isManager) {
+    renderManagerTradesView(el, trades);
+  } else {
+    renderRepTradesView(el, trades);
+  }
+}
+
+function renderRepTradesView(el, trades) {
+  let html = '';
+
+  // Summary pills
+  html += `<div class="sum-pills">
+    <div class="sum-pill"><span class="num">${trades.length}</span>Open Requests</div>
+  </div>`;
+
+  // New request button
+  if (!showTradeForm) {
+    html += `<button class="btn-new-trade" onclick="openTradeForm(null)">+ New Trade Request</button>`;
+  }
+
+  // Form
+  if (showTradeForm) {
+    const pf = tradeFormPrefill;
+    html += `<div class="form-wrap">
+      <h3>New Dealer Trade Request</h3>
+      ${pf ? `<div class="prefill-bar">Pre-filled from workbook: <strong>${pf.customer}</strong> — ${pf._v}</div>` : ''}
+      <div class="section-label">Customer's Current Vehicle</div>
+      <div class="form-row cols3">
+        <div class="field"><label>Customer Name *</label><input id="tf-custName" type="text" placeholder="Full name" value="${pf?pf.customer:''}"></div>
+        <div class="field"><label>Year</label><input id="tf-custYear" type="text" placeholder="e.g. 2021" value="${pf?pf.year:''}"></div>
+        <div class="field"><label>Make</label><input id="tf-custMake" type="text" placeholder="e.g. Chevrolet" value="${pf?pf.make:''}"></div>
+      </div>
+      <div class="form-row cols2">
+        <div class="field"><label>Model</label><input id="tf-custModel" type="text" placeholder="e.g. Equinox" value="${pf?pf.model:''}"></div>
+      </div>
+      <div class="section-label">Looking For</div>
+      <div class="form-row cols4">
+        <div class="field"><label>Year</label><input id="tf-wantYear" type="text" placeholder="e.g. 2025"></div>
+        <div class="field"><label>Make</label><input id="tf-wantMake" type="text" placeholder="e.g. Chevrolet"></div>
+        <div class="field"><label>Model *</label><input id="tf-wantModel" type="text" placeholder="e.g. Traverse"></div>
+        <div class="field"><label>Trim</label><input id="tf-wantTrim" type="text" placeholder="e.g. LT"></div>
+      </div>
+      <div class="form-row cols2">
+        <div class="field"><label>Color / Options</label><input id="tf-wantColor" type="text" placeholder="e.g. Summit White, sunroof"></div>
+        <div class="field"><label>Needed Within</label>
+          <select id="tf-wantWithin">
+            <option value="">Select…</option>
+            <option value="7">7 days</option>
+            <option value="14">14 days</option>
+            <option value="30">30 days</option>
+            <option value="60">60 days</option>
+            <option value="90">90 days</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field" style="flex:1">
+          <label>Notes for Manager</label>
+          <textarea id="tf-notes" placeholder="Any additional details…"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="cancelTradeForm()">Cancel</button>
+        <button class="btn-submit" id="tf-submitBtn" onclick="submitTrade()">Submit Request</button>
+      </div>
+    </div>`;
+  }
+
+  // Trade cards
+  if (trades.length === 0 && !showTradeForm) {
+    html += `<div class="no-trades">No open trade requests. Use the button above to post one.</div>`;
+  } else {
+    trades.forEach(t => {
+      const id = t.ID;
+      const isCardOpen = openTradeCards.has(id);
+      const postedDate = t.PostedAt ? fmtDate(t.PostedAt) : '';
+      const wantWithinLabel = t.WantWithin ? t.WantWithin + ' days' : '';
+      const wantDesc = [t.WantYear, t.WantMake, t.WantModel, t.WantTrim].filter(Boolean).join(' ');
+      html += `<div class="trade-card${isCardOpen?' open':''}">
+        <div class="trade-card-head" onclick="toggleTradeCard('${id}')">
+          <div class="tc-left">
+            <span class="tc-expand">&#9654;</span>
+            <div>
+              <div class="tc-cust">${t.CustName}</div>
+              <div class="tc-veh">${[t.CustYear,t.CustMake,t.CustModel].filter(Boolean).join(' ')} → ${wantDesc||'?'}</div>
+            </div>
+          </div>
+          <div class="tc-right">
+            <span class="badge-open">OPEN</span>
+            <span class="tc-date">${postedDate}</span>
+          </div>
+        </div>
+        <div class="trade-card-body">
+          <div class="section-label" style="margin-top:0">Current Vehicle</div>
+          <div class="cust-grid">
+            <div class="cust-item"><span class="ci-label">Customer</span><span class="ci-val">${t.CustName}</span></div>
+            <div class="cust-item"><span class="ci-label">Year</span><span class="ci-val">${t.CustYear||'—'}</span></div>
+            <div class="cust-item"><span class="ci-label">Make</span><span class="ci-val">${t.CustMake||'—'}</span></div>
+            <div class="cust-item"><span class="ci-label">Model</span><span class="ci-val">${t.CustModel||'—'}</span></div>
+          </div>
+          <div class="section-label">Looking For</div>
+          <div class="want-grid">
+            <div class="want-item"><span class="wi-label">Year</span><span class="wi-val">${t.WantYear||'—'}</span></div>
+            <div class="want-item"><span class="wi-label">Make</span><span class="wi-val">${t.WantMake||'—'}</span></div>
+            <div class="want-item"><span class="wi-label">Model</span><span class="wi-val">${t.WantModel||'—'}</span></div>
+            <div class="want-item"><span class="wi-label">Trim</span><span class="wi-val">${t.WantTrim||'—'}</span></div>
+            <div class="want-item"><span class="wi-label">Color</span><span class="wi-val">${t.WantColor||'—'}</span></div>
+            <div class="want-item"><span class="wi-label">Within</span><span class="wi-val">${wantWithinLabel||'—'}</span></div>
+          </div>
+          ${t.Notes ? `<div class="tc-notes">${t.Notes}</div>` : ''}
+          <button class="btn-remove" onclick="dismissTrade('${id}','${t.CustName||''}','rep')">Remove Request</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+function renderManagerTradesView(el, trades) {
+  // Group by rep
+  const byRep = {};
+  trades.forEach(t => {
+    const r = t.Rep || 'Unknown';
+    if (!byRep[r]) byRep[r] = [];
+    byRep[r].push(t);
+  });
+  const repNames = Object.keys(byRep).sort();
+  const totalOpen = trades.length;
+  const repsWithTrades = repNames.length;
+
+  let html = `<div class="sum-pills">
+    <div class="sum-pill"><span class="num">${totalOpen}</span>Open Requests</div>
+    <div class="sum-pill"><span class="num">${repsWithTrades}</span>Reps Requesting</div>
+  </div>`;
+
+  if (trades.length === 0) {
+    html += `<div class="no-trades">No open trade requests from any rep.</div>`;
+  } else {
+    repNames.forEach(rep => {
+      const repTrades = byRep[rep];
+      html += `<div class="mgr-rep-section">
+        <div class="mgr-rep-header">${rep}<span class="rh-count">${repTrades.length}</span></div>`;
+      repTrades.forEach(t => {
+        const wantDesc = [t.WantYear, t.WantMake, t.WantModel, t.WantTrim].filter(Boolean).join(' ');
+        const wantWithinLabel = t.WantWithin ? t.WantWithin + 'd' : '';
+        const postedDate = t.PostedAt ? fmtDate(t.PostedAt) : '';
+        html += `<div class="mgr-trade-row">
+          <div class="mgr-trade-info">
+            <div class="mgr-trade-cust">${t.CustName}</div>
+            <div class="mgr-trade-veh">${[t.CustYear,t.CustMake,t.CustModel].filter(Boolean).join(' ')}</div>
+            <div class="mgr-trade-want">Looking for: ${wantDesc||'?'}${t.WantColor?' · '+t.WantColor:''}${wantWithinLabel?' · within '+wantWithinLabel:''}</div>
+            ${t.Notes?`<div class="mgr-trade-notes">${t.Notes}</div>`:''}
+            <div class="mgr-trade-meta">Posted ${postedDate}</div>
+          </div>
+          <button class="mgr-dismiss-btn" onclick="dismissTrade('${t.ID}','${t.CustName||''}','manager')">Dismiss</button>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+function toggleTradeCard(id) {
+  openTradeCards.has(id) ? openTradeCards.delete(id) : openTradeCards.add(id);
+  renderTradesTab();
+}
+
+function openTradeForm(recordId) {
+  tradeFormPrefill = recordId != null ? records[recordId] : null;
+  showTradeForm = true;
+  switchTab('trades');
+  renderTradesTab();
+  // Scroll to top of trades content
+  setTimeout(() => {
+    const el = document.getElementById('tradesContent');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+function cancelTradeForm() {
+  showTradeForm = false;
+  tradeFormPrefill = null;
+  renderTradesTab();
+}
+
+async function submitTrade() {
+  const custName = (document.getElementById('tf-custName').value || '').trim();
+  const wantModel = (document.getElementById('tf-wantModel').value || '').trim();
+  if (!custName) { alert('Customer name is required.'); return; }
+  if (!wantModel) { alert('Target model is required.'); return; }
+
+  const btn = document.getElementById('tf-submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  const payload = {
+    action: 'saveTrade',
+    token: session.token,
+    rep: currentRepName,
+    custName,
+    custYear: (document.getElementById('tf-custYear').value || '').trim(),
+    custMake: (document.getElementById('tf-custMake').value || '').trim(),
+    custModel: (document.getElementById('tf-custModel').value || '').trim(),
+    wantYear: (document.getElementById('tf-wantYear').value || '').trim(),
+    wantMake: (document.getElementById('tf-wantMake').value || '').trim(),
+    wantModel,
+    wantTrim: (document.getElementById('tf-wantTrim').value || '').trim(),
+    wantColor: (document.getElementById('tf-wantColor').value || '').trim(),
+    wantWithin: (document.getElementById('tf-wantWithin').value || '').trim(),
+    notes: (document.getElementById('tf-notes').value || '').trim(),
+  };
+
+  try {
+    const result = await apiPost(payload);
+    if (result.error) { alert('Error: ' + result.error); btn.disabled=false; btn.textContent='Submit Request'; return; }
+
+    // Add to local tradeRequests map — key by dashLink if prefill available, else by custName
+    const key = tradeFormPrefill ? tradeFormPrefill.dashLink : custName;
+    if (key) {
+      tradeRequests[key] = {
+        ID: result.id,
+        Rep: currentRepName,
+        CustName: custName,
+        CustYear: payload.custYear,
+        CustMake: payload.custMake,
+        CustModel: payload.custModel,
+        WantYear: payload.wantYear,
+        WantMake: payload.wantMake,
+        WantModel: payload.wantModel,
+        WantTrim: payload.wantTrim,
+        WantColor: payload.wantColor,
+        WantWithin: payload.wantWithin,
+        Notes: payload.notes,
+        PostedAt: new Date().toISOString(),
+        Status: 'open',
+      };
+    }
+
+    showTradeForm = false;
+    tradeFormPrefill = null;
+    updateTradeBadge();
+    render();          // refresh workbook pill
+    renderTradesTab(); // refresh trades list
+
+  } catch(e) {
+    alert('Submit failed: ' + e.message);
+    btn.disabled = false;
+    btn.textContent = 'Submit Request';
+  }
+}
+
+async function dismissTrade(id, custName, dismissedBy) {
+  const label = dismissedBy === 'manager' ? 'Dismiss this request?' : 'Remove this trade request?';
+  if (!confirm(label)) return;
+
+  try {
+    const result = await apiPost({ action: 'dismissTrade', token: session.token, id, dismissedBy });
+    if (result.error) { alert('Error: ' + result.error); return; }
+
+    // Remove from local map — find by ID
+    for (const key of Object.keys(tradeRequests)) {
+      if (tradeRequests[key].ID === id) { delete tradeRequests[key]; break; }
+    }
+    updateTradeBadge();
+    render();
+    renderTradesTab();
+  } catch(e) { alert('Dismiss failed: ' + e.message); }
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════
 function fmtDate(v) {
   if (!v) return '';
   const d = new Date(v);
@@ -705,10 +1125,10 @@ function fmtDate(v) {
   return `${d.getMonth()+1}/${d.getDate()}/${String(d.getFullYear()).slice(2)}`;
 }
 function fmtAPR(a) {
-  if (a == null || a === '') return '';
+  if (a==null||a==='') return '';
   const v = Number(a);
   if (isNaN(v)) return String(a);
-  return v < 1 ? (v*100).toFixed(1)+'%' : v.toFixed(1)+'%';
+  return v<1?(v*100).toFixed(1)+'%':v.toFixed(1)+'%';
 }
 function showLoading(show) {
   document.getElementById('loadingIndicator').classList.toggle('hidden', !show);
